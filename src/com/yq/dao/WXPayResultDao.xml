@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yq.dao.WXPayResultDao">
+	<insert id="insert" parameterType="java.util.Map">
+		insert
+		tb_wx_pay_result(transaction_id,bank_type,openid,sign,fee_type,mch_id,cash_fee,out_trade_no,appid,total_fee,trade_type,result_code,time_end,is_subscribe,return_code)
+		values
+		(
+		#{transaction_id},#{bank_type},#{openid},#{sign},#{fee_type},#{mch_id},#{cash_fee},#{out_trade_no},#{appid},#{total_fee},#{trade_type},#{result_code},#{time_end},#{is_subscribe},#{return_code}
+		)
+	</insert>
+
+</mapper>

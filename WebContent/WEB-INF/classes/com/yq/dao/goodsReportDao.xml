@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yq.dao.GoodsReportDao">
+	<insert id="insert" parameterType="com.yq.entity.GoodsReport">
+		INSERT INTO
+		tb_goods_report(barNum, lotNum, batchNum, inspReport,
+		reportDeskFile,pdf2jpgData)
+		VALUES (#{barNum}, #{lotNum}, #{batchNum},
+		#{inspReport},
+		#{reportDeskFile},#{pdf2jpgData})
+	</insert>
+
+	<update id="update" parameterType="com.yq.entity.GoodsReport">
+		UPDATE tb_goods_report SET
+		<if test="barNum!=null and barNum!=''">
+			barNum=#{barNum},
+		</if>
+		<if test="lotNum!=null and lotNum!=''">
+			lotNum=#{lotNum},
+		</if>
+		<if test="batchNum!=null and batchNum!=''">
+			batchNum=#{batchNum},
+		</if>
+		<if test="inspReport!=null and inspReport!=''">
+			inspReport=#{inspReport},
+		</if>
+		modifyTime = now() WHERE deleteFlag = 0 and id = #{id}
+	</update>
+
+	<update id="deleteLogic">
+		UPDATE tb_goods_report SET deleteFlag = 1 
+	      	where inspReport in
+	        <foreach collection="inspReports" item = "code" open="(" separator="," close=")" index="index">
+	            #{code}
+	        </foreach>
+	</update>
+	
+	<update id="deleteLogicById">
+		UPDATE tb_goods_report SET deleteFlag = 1 where id = #{id}
+	</update>
+
+	<select id="list" resultType="com.yq.entity.GoodsReport">
+		select * from tb_goods_report where 1=1
+		<if test="barNum!=null and barNum!=''">
+			and barNum like concat('%',#{barNum},'%')
+		</if>
+		<if test="lotNum!=null and lotNum!=''">
+			and lotNum like concat('%',#{lotNum},'%')
+		</if>
+		<if test="batchNum!=null and batchNum!=''">
+			and batchNum like concat('%',#{batchNum},'%')
+		</if>
+		<if test="inspReport!=null and inspReport!=''">
+			and inspReport like concat('%',#{inspReport},'%')
+		</if>
+		<if test="id!=null and id!=''">
+			and id=#{id}
+		</if>
+		order by id desc
+	</select>
+	
+	
+	<select id="search" resultType="com.yq.vo.GoodsReportVo">
+		select k.*,t.goods_code goodsCode,t.goods_name goodsName,t.goods_spe goodsSpe from tb_goods t right join tb_goods_report k on t.bar_num= k.barNum where deleteFlag=0 
+		<if test="barNum!=null and barNum!=''">
+			and k.barNum like concat('%',#{barNum},'%')
+		</if>
+		<if test="lotNum!=null and lotNum!=''">
+			and k.lotNum like concat('%',#{lotNum},'%')
+		</if>
+		<if test="batchNum!=null and batchNum!=''">
+			and k.batchNum like concat('%',#{batchNum},'%')
+		</if>
+		<if test="goodsCode!=null and goodsCode!=''">
+			and t.goods_code like concat('%',#{goodsCode},'%')
+		</if>
+		<if test="inspReport!=null and inspReport!=''">
+			and k.inspReport like concat('%',#{inspReport},'%')
+		</if>
+		order by k.id desc
+	</select>
+	
+	
+	<select id="listByDiyColum" resultType="com.yq.vo.GoodsReportVo">
+		select k.*,t.goods_code goodsCode,t.goods_name goodsName,t.goods_spe goodsSpe from tb_goods t inner join tb_goods_report k on t.bar_num= k.barNum where deleteFlag=0 
+		 <if test="inspReports !=null and inspReports.length > 0">
+	      	and k.inspReport in
+	        <foreach collection="inspReports" item = "code" open="(" separator="," close=")" index="index">
+	            #{code}
+	        </foreach>
+	    </if>
+		order by k.id desc
+	</select>
+
+</mapper>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yq.dao.DistributionMerchantsDao">
+
+    <insert id="save" parameterType="com.yq.entity.DistributionMerchants">
+    	<selectKey keyProperty="id" order="AFTER" resultType="java.lang.Long">
+	      select LAST_INSERT_ID()
+	    </selectKey>
+		insert into ganzhu_common_db.tb_distribution_merchants(adcode,address,adname,citycode,cityname,discount,distance,email,entr_location,exit_location,groupbuy,mapId,indoor_map,lng,lat,name,pcode,photos,pname,postcode,rating,shopinfo,tel,type,website,custId,custOpenId,custAddress,setOpenId,setType,distributionId,markAdCode) values(#{adcode},#{address},#{adname},#{citycode},#{cityname},#{discount},#{distance},#{email},#{entr_location},#{exit_location},#{groupbuy},#{mapId},#{indoor_map},#{lng},#{lat},#{name},#{pcode},#{photos},#{pname},#{postcode},#{rating},#{shopinfo},#{tel},#{type},#{website},#{custId},#{custOpenId},#{custAddress},#{setOpenId},#{setType},#{distributionId},#{markAdCode})
+    </insert>
+    
+    <select id="getMerchantByDistributionId" resultType="com.yq.entity.DistributionMerchants">
+ 		select f.* from ganzhu_common_db.tb_distribution_merchants f where f.distributionId=#{distributionId} and f.createDateTime = (select max(f.createDateTime) from ganzhu_common_db.tb_distribution t ,ganzhu_common_db.tb_distribution_merchants f where t.id=f.distributionId and distributionId = #{distributionId} )
+ 	</select>
+ 	
+ 	
+ 	<select id="getMerchantByWxusercust" resultType="com.yq.entity.DistributionMerchants">
+		SELECT
+			f.adcode,
+			f.address,
+			f.adname,
+			f.citycode,
+			f.cityname,
+			f.discount,
+			f.distance,
+			f.email,
+			f.entr_location,
+			f.exit_location,
+			f.groupbuy,
+			f.mapId,
+			f.indoor_map,
+			f.lng,
+			f.lat,
+			f.NAME,
+			f.pcode,
+			f.photos,
+			f.pname,
+			f.postcode,
+			f.rating,
+			f.shopinfo,
+			f.tel,
+			f.type,
+			f.website,
+			f.markAdCode 
+		FROM
+			WxUserCust t,
+			tb_user_merchants f 
+		WHERE
+			t.gaodeId = f.mapId 
+			AND t.Custid = ${custId}
+	 </select>
+    
+</mapper>

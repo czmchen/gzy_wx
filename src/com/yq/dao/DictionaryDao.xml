@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yq.dao.DictionaryDao">
+   <select id="getDataByKey" resultType="com.yq.entity.Dictionary">
+		select t.* from tb_dictionary t where t.dicKey = #{dicKey}
+	</select>
+
+	<update id="update" parameterType="com.yq.entity.Dictionary">
+		update tb_dictionary set 
+		<if test="dicVal!=null and dicVal!=''">
+			dicVal=#{dicVal}, 
+		</if>
+		lastUpdateTime = now() 
+		where dicKey = #{dicKey}
+	</update>
+
+    
+</mapper>

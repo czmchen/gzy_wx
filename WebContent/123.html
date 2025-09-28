@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+    <title>点标记</title>
+    <link rel="stylesheet" href="https://a.amap.com/jsapi_demos/static/demo-center/css/demo-center.css" />
+    <style>
+        html,body,#container{
+            height:100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="container" ></div>
+    <div class="info" style='min-width:10rem;'>
+        <img src="//a.amap.com/lbs/static/img/js-markonapp.png" style='width:120px;height:120px'>
+        <div style='text-align: center'>手机扫码打开示例</div>
+    </div>
+    <script type="text/javascript">
+  window._AMapSecurityConfig = {
+	  /* serviceHost:'http://127.0.0.1:8000/_AMapService' */
+	  securityJsCode:'c4b3ed22a89083edbd3b6d994e4814e8',
+  }
+</script>
+<script type="text/javascript" src="https://webapi.amap.com/maps?v=2.0&key=7d87e02d3cab51a672c63df409cd8bae&plugin=AMap.Adaptor"></script>
+
+    <script>
+        var map = new AMap.Map("container", {
+            zoom: 18,
+            center:[116.473188,39.993253]
+        });
+        var marker = new AMap.Marker({
+            map:map,
+            position:[116.473188,39.993253],
+            label: {
+                offset: new AMap.Pixel(20, 20),//修改label相对于maker的位置
+                content: "点击Marker打开高德地图"
+            } 
+        })
+        marker.on('click',function(e){
+            marker.markOnAMAP({
+                name:'首开广场',
+                position:marker.getPosition()
+            })
+        })
+        if(AMap.UA.mobile){
+            document.getElementsByClassName('info')[0].style.display='none';
+        }
+
+    </script>
+</body>
+</html>

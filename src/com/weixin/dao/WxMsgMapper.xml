@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.weixin.dao.WxMsgMapper" >
+  <insert id="insert" parameterType="com.weixin.entity.WxMsg" >
+   INSERT INTO tb_wx_msg(
+		msgId,
+		messageType,
+		fromUserName,
+		toUserName,
+		createTime,
+		content,
+		contentBak,
+		picUrl,
+		mediaId,
+		format,
+		fileMd5,
+		fileTotalLen,
+		fileKey,
+		description,
+		title,
+		location_X,
+		location_Y,
+		scale,
+		label,
+		thumbMediaId,isMsgNew,msgSendOrReceive,sendResult,isDownload,downloadResult
+	)
+		VALUES
+	(
+		#{msgId},
+		#{messageType},
+		#{fromUserName},
+		#{toUserName},
+		#{createTime},
+		#{content},
+		#{contentBak},
+		#{picUrl},
+		#{mediaId},
+		#{format},
+		#{fileMd5},
+		#{fileTotalLen},
+		#{fileKey},
+		#{description},
+		#{title},
+		#{location_X},
+		#{location_Y},
+		#{scale},
+		#{label},
+		#{thumbMediaId},1,#{msgSendOrReceive},#{sendResult},#{isDownload},#{downloadResult}
+		)
+  </insert>
+  
+  
+  <insert id="insertNewMsg">
+   	insert into tb_wx_msg(tb_wx_msg.toUserName,tb_wx_msg.createTime) values (#{openId},now())
+  </insert>
+  
+   <select id="getAllMsg" resultType="com.weixin.entity.WxMsg">
+	select IFNULL(tfk.head_img,'http://thirdwx.qlogo.cn/mmopen/vi_32/p6hAZJicz9D4y8AOjbkxicJ1yPpicayprIvhtu4xqVUTSHcw3WkZJYQjR1qfq4Vpic7zMLRa2XZudvVJjQk0E3PfSQ/132') fromHead_img,
+	IFNULL(IFNULL(IFNULL(tfk.custRemark,tfk.custName),tfk.realname),'甘竹油官方客服') fromName,
+	txk.* from (
+		select tb_wx_msg.id id,msgId,
+			messageType,
+			fromUserName,
+			toUserName,
+			createTime,
+			content,
+			picUrl,
+			mediaId,
+			format,
+			fileMd5,
+			fileTotalLen,
+			fileKey,
+			description,
+			title,
+			location_X,
+			location_Y,
+			scale,
+			label,
+			tx.head_img ,
+			msgSendOrReceive,
+			isDownload,
+		thumbMediaId,isMsgNew from tb_wx_msg inner join tb_user tx on toUserName = tx.oppen_id
+		<where>
+			content is not null
+			<if test="openId != null and openId != ''">
+		     	and toUserName = #{openId}
+		    </if>
+		    <if test="isMsgNew != null">
+		     	and isMsgNew = #{isMsgNew}
+		    </if>
+		</where>
+	) txk left join tb_user tfk on txk.fromUserName = tfk.oppen_id order by txk.id asc
+  </select>
+  
+  <select id="getNeed2Download" resultType="com.weixin.entity.WxMsg">
+		select * from tb_wx_msg t where (t.messageType = 'voice' or t.messageType = 'video') and t.isdownload = 0
+  </select>
+  
+   <select id="getNewMsgList" resultType="com.yq.vo.WXMsgListVo">
+	SELECT tu.oppen_id openId,
+		IFNULL(IFNULL(tu.custRemark,tu.custName),tu.realname) wxName,tu.head_img head_img
+		,tx.content lastMsgContext,tx.createTime lastMsgDateTime,tx.isMsgNew isNewMsg,tx.thumbMediaId thumbMediaId,tx.format format from 
+		tb_wx_msg tx INNER JOIN (select max(t.id) id from tb_wx_msg t group by
+		t.toUserName) tf on tx.id = tf.id INNER JOIN tb_user tu on
+		tx.toUserName = tu.oppen_id
+		<where>
+			<if test="wxName != null and wxName != ''">
+		     	IFNULL(IFNULL(tu.custRemark,tu.custName),tu.realname) like CONCAT('%',#{wxName},'%')
+		    </if>
+		</where>
+		  order by tx.id desc limit #{recordAmount}
+  </select>
+  
+  <update id="updateNewMsg2Read" >
+    update tb_wx_msg set tb_wx_msg.isMsgNew = 0 where toUserName = #{openId} and isMsgNew = 1
+  </update>
+  
+  <update id="updateNewMsg2ReadByIds">
+	update tb_wx_msg set tb_wx_msg.isMsgNew = 0 where toUserName = #{openId} and id IN
+	<foreach collection="ids" item="id" open="(" separator="," close=")">
+		#{id}
+	</foreach>
+</update>
+  
+  <update id="updateDownloadResult"  parameterType="com.weixin.entity.WxMsg">
+    update tb_wx_msg set isDownload = #{isDownload},downloadResult=#{downloadResult} where mediaId = #{mediaId}
+  </update>
+  
+   <select id="search" resultType="com.weixin.entity.WxMsg">
+		select * from tb_wx_msg t 
+		<where>
+			<if test="mediaId != null and mediaId != ''">
+		     	t.mediaId = #{mediaId}
+		    </if>
+		</where>
+  </select>
+
+	<update id="updatePicUrlByMediaId">
+		update tb_wx_msg set picUrl = #{picUrl} where mediaId = #{mediaId}
+	</update>
+</mapper>

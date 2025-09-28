@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yq.dao.GoodsDao">
+    <insert id="insert" parameterType="java.util.Map">
+	insert tb_goods(goods_name,goods_code,goods_img,goods_spe,goods_price,goods_detail,add_time,ctg_id,status,type,nbox) 
+	values
+	(
+	#{goods_name},#{goods_code},#{goods_img},#{goods_spe},#{goods_price},#{goods_detail},#{add_time},#{ctg_id},#{status},#{type},#{nbox}
+	) 
+    </insert>
+    
+    <update id="update" parameterType="java.util.Map">
+    update tb_goods set goods_name=#{goods_name},goods_code=#{goods_code},goods_img=#{goods_img},goods_spe=#{goods_spe},
+    goods_price=#{goods_price},goods_detail=#{goods_detail},ctg_id=#{ctg_id},type=#{type},nbox=#{nbox}
+     where goods_id=#{goods_id}
+    </update>
+    
+    <update id="upstatus" parameterType="java.util.Map">
+    update tb_goods set status=#{status} where goods_id=#{goods_id}
+    </update>
+    
+    <update id="updateGoodsReport" parameterType="java.util.Map">
+    	update tb_goods set bar_num=#{bar_num} where goods_code=#{goods_code}
+    </update>
+    
+   <update id="upisrec" parameterType="java.util.Map">
+    update tb_goods set is_recommend=#{is_recommend} where goods_id=#{goods_id}
+    </update>
+    
+    <select id="list" resultType="com.yq.entity.Goods">
+    select * from tb_goods where status=#{status} 
+    and type=#{type} 
+    <if test="goods_name!=null and goods_name!=''">
+    and goods_name like CONCAT('%',#{goods_name},'%')
+    </if>
+    <if test="is_recommend!=null and is_recommend!=0">
+    and is_recommend=#{is_recommend}
+    </if>
+    <if test="ctg_id!=null and ctg_id!=0">
+    and ctg_id=#{ctg_id}
+    </if>
+    order by add_time desc 
+    <if test="pageSize!=null and pageSize!=0">
+     limit #{currentNum},#{pageSize}
+    </if>
+    </select>
+    
+    <select id="listOrderByName" resultType="com.yq.entity.Goods">
+    	select * from tb_goods where status=#{status} order by goods_price,nbox asc
+    </select>
+    
+    <select id="listOrderJoinReport" resultType="com.yq.entity.Goods">
+    	select * from tb_goods t where t.bar_num in (select r.barNum from tb_goods_report r where r.deleteFlag=0)  and status=#{status} order by t.goods_price,t.nbox asc
+    </select>
+    
+    
+    <select id="count" resultType="int">
+    select count(1) from tb_goods where status=#{status} 
+    and type=#{type} 
+     <if test="goods_name!=null and goods_name!=''">
+    and goods_name like CONCAT('%',#{goods_name},'%')
+    </if>
+    <if test="is_recommend!=null and is_recommend!=0">
+    and is_recommend=#{is_recommend}
+    </if>
+    <if test="ctg_id!=null and ctg_id!=0">
+    and ctg_id=#{ctg_id}
+    </if>
+    </select>
+    
+     <select id="listById" resultType="com.yq.entity.Goods">
+    select * from tb_goods where goods_id=#{goods_id}
+    </select>
+    
+    <select id="searchByPar" resultType="com.yq.entity.Goods">
+    	select * from tb_goods where goods_name like concat('%',#{searchKey},'%') or goods_code like concat('%',#{searchKey},'%')
+    </select>
+    
+    <select id="listAllGoodsIdAndImg" resultType="com.yq.entity.Goods">
+    	select goods_id,goods_code,goods_img from tb_goods
+    </select>
+    
+    <select id="getBuildInMemberGoodsCar" resultType="com.yq.entity.Goods">
+    	select t.goods_id,t.goods_code,t.goods_name,t.goods_spe,t.goods_weight,t.preference1,t.nbox,IFNULL(tg.Price,t.wholesalePrice) goods_price,t.salesPrice1,t.salesAmount1 from tb_goods t left join (select tx.InvID,tx.Price from tb_customer_price tx where tx.CustID=#{custID}) tg on t.goods_code = tg.InvID where t.status = 1 order by t.goods_qty asc
+    </select>
+    
+    <select id="getGoodsCar" resultType="com.yq.entity.Goods">
+    	select t.goods_id,t.goods_code,t.goods_name,t.goods_spe,t.goods_weight,t.nbox,t.goods_price from tb_goods t where t.status = 1 order by t.goods_qty asc
+    </select>
+    
+    <select id="listByIds" resultType="com.yq.entity.Goods">
+    	select * from tb_goods where goods_id in
+    	<foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+    
+</mapper>

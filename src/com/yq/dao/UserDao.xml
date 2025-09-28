@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yq.dao.UserDao">
+    <insert id="insert" parameterType="java.util.Map">
+	insert tb_user(oppen_id,username,realname,password,head_img,add_time,status,mphone) 
+	values
+	(
+	#{oppen_id},'${username}','${realname}',#{password},#{head_img},#{add_time},#{status},#{mphone}
+	) 
+    </insert>
+    
+    <insert id="insertNotRep" parameterType="java.util.Map">
+	insert tb_user(oppen_id,username,realname,password,head_img,add_time,status,mphone,area_name,isWXFocus) 
+	select * from (select #{oppen_id} oppen_id,'${username}' username,'${realname}' realname,#{password} password,#{head_img} head_img,#{add_time} add_time,#{status} status,#{mphone} mphone,#{area_name} area_name,#{isWXFocus} isWXFocus) tx
+	where NOT EXISTS (SELECT 1 FROM tb_user WHERE oppen_id = #{oppen_id})
+    </insert>
+    
+    <update id="update" parameterType="java.util.Map">
+	    update tb_user set
+	    	username='${username}',
+	   		realname='${realname}',
+	    	area_name=#{area_name},
+	    	 <if test="isWXFocus!=null and isWXFocus!=''">
+		     	isWXFocus=#{isWXFocus},
+		    </if>
+	    	head_img=#{head_img}
+	    where oppen_id=#{oppen_id}
+    </update>
+    
+      <update id="updateBatch" parameterType="java.util.List" >
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            update tb_user set 
+            <if test="item.realname != null and item.realname !=''" >
+                realname = #{item.realname,jdbcType=VARCHAR},
+            </if>
+            <if test="item.head_img != null and item.head_img !=''" >
+                head_img = #{item.head_img,jdbcType=VARCHAR},
+            </if>
+             lastUpdateTime = now() where oppen_id = #{item.oppen_id,jdbcType=VARCHAR}
+        </foreach>
+    </update>
+    
+    <update id="updateIsWXFocus" parameterType="java.util.Map">
+	    update tb_user set
+	    	isWXFocus=#{isWXFocus}
+	    where oppen_id=#{oppen_id}
+    </update>
+    
+    <update id="uparea" parameterType="java.util.Map">
+    update tb_user set area_id=#{area_id},area_name=#{area_name} where oppen_id=#{oppen_id}
+    </update>
+   
+    <update id="updateSalesPrice1">
+    	update tb_user set custStatus=0,salesPriceTimes=(salesPriceTimes+1) where oppen_id=#{oppen_id}
+    </update>
+    
+    <update id="upstatus" parameterType="java.util.Map">
+    update tb_user set status=#{status} where oppen_id=#{oppen_id}
+    </update>
+    
+    <update id="upmbertime" parameterType="java.util.Map">
+    update tb_user set member_time=#{member_time} where oppen_id=#{oppen_id}
+    </update>  
+    
+    <update id="upmphone" parameterType="java.util.Map">
+    	update tb_user set mphone=#{mphone},KHMC=#{KHMC},KHLXR=#{KHLXR},crm_province=#{crm_province},crm_city=#{crm_city},crm_area=#{crm_area},crm_town=#{crm_town},crm_addr_name=#{crm_addr_name},cityPickerCN=#{cityPickerCN},latitude=#{latitude},longitude=#{longitude},salesman=#{salesman},custStatus=#{custStatus},gaodeId=#{gaodeId},merchantsId=#{merchantsId} where oppen_id=#{oppen_id}
+    </update>
+    
+     <update id="upRMCustInfo" parameterType="java.util.Map">
+	    update tb_user set custRemark = #{custRemark},custid = #{custid}
+	    ,custKHWXH = #{custKHWXH},custName = #{custName},crm_addr_name = #{crm_addr_name}
+	    ,crm_area = #{crm_area},crm_city = #{crm_city},crm_province = #{crm_province}
+	    ,crm_town = #{crm_town},KHLXR = #{KHLXR},KHMC = #{KHMC},cityPickerCN=#{cityPickerCN}
+	    ,mphone=#{mphone},custStatus=#{custStatus},salesman=#{salesman} 
+		where oppen_id=#{oppen_id}
+    </update>  
+          
+    <select id="list" resultType="com.yq.entity.User">
+    select * from tb_user where 1=1
+    <if test="realname!=null and realname!=''">
+     and realname like concat('%',#{realname},'%') 
+    </if>
+    order by add_time desc limit #{currentNum},#{pageSize}
+    </select>
+    
+  
+    <select id="count" resultType="int">
+    select count(1) from tb_user where 1=1
+    <if test="realname!=null and realname!=''">
+     and realname=#{realname}
+    </if>
+    </select>
+    
+    <select id="listById" resultType="com.yq.entity.User">
+    select * from tb_user where oppen_id=#{oppen_id}
+    </select>
+    
+    <select id="getUserByOpenId" resultType="com.yq.entity.User">
+    	select * from tb_user where oppen_id=#{oppen_id}
+    </select>
+    
+    <select id="getCustidByOpenId" resultType="String">
+    	select custid from tb_user where oppen_id=#{oppen_id}
+    </select>
+   
+    <select id="isMember" resultType="int">
+    select count(1) from tb_user where oppen_id=#{oppen_id} and member_time>#{member_time}
+    </select>
+    
+    <select id="allUser" resultType="com.yq.entity.User" useCache="true">
+    	select oppen_id,realname,mphone,area_name,custRemark,custName,add_time,head_img from tb_user where 1=1
+	   <if test="wxName != null and wxName != ''">
+	     	and IFNULL(IFNULL(custRemark,custName),realname) like CONCAT('%',#{wxName},'%')
+	    </if>
+	    order by add_time desc
+    </select>
+    
+</mapper>
